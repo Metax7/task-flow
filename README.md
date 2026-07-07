@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TaskFlow
+
+A full-stack task management application built with Next.js, MongoDB, and Better-Auth.
+
+## Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **UI:** React 19, Tailwind CSS v4, shadcn/ui (Radix UI)
+- **Database:** MongoDB with Mongoose 9
+- **Auth:** Better-Auth (email/password, MongoDB adapter)
+- **Forms:** react-hook-form + zod validation
+- **Patterns:** Server Actions, neverthrow (Result), DAL caching with `"use cache"`
+
+## Features
+
+- User sign up / sign in / sign out
+- Create, read, update, and delete tasks
+- Filter: all tasks or only your own
+- Gravatar avatars via SHA256 email hash
+- Server-side cached data fetching with cache tags
+- Validation on client (zod) and server (Mongoose + neverthrow)
+- Responsive dark-mode UI with toast notifications
+
+## Project Structure
+
+```
+app/
+  page.tsx            # Dashboard (task list + create form)
+  layout.tsx          # Root layout (dark mode, fonts)
+  sign-in/page.tsx    # Sign in page
+  sign-up/page.tsx    # Sign up page
+  api/auth/[...all]/  # Better-Auth API route
+components/
+  TaskCard.tsx        # Task card with edit/delete (author only)
+  TaskForm.tsx        # Create / update task form
+  signin-form.tsx     # Sign in form
+  signup-form.tsx     # Sign up form (with Gravatar)
+  signout-button.tsx  # Sign out button
+  ui/                 # shadcn/ui primitives
+lib/
+  auth.ts             # Better-Auth server config
+  auth-client.ts      # Better-Auth client config
+  db.ts               # Mongoose connection (cached singleton)
+  schemas.ts          # Zod schemas (task, signup)
+  server/task.ts      # Server-only task service (CRUD + auth guards)
+  utils.ts            # Utility functions (cn)
+models/
+  User.ts             # Mongoose User model
+  Task.ts             # Mongoose Task model (paginated, unique validation)
+dal/
+  tasks.ts            # Cached task queries (getTasks, getUserTasks)
+  users.ts            # Cached user queries (getUsers)
+actions/
+  tasks.ts            # Server Actions (create, update, delete)
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js or Bun
+- MongoDB instance (local or Atlas)
+
+### Setup
+
+1. Clone the repository
+2. Copy environment variables:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Fill in `.env`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+MONGODB_URI=mongodb://localhost:27017/taskflow
+BETTER_AUTH_SECRET=your-secret-here
+BETTER_AUTH_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Install dependencies:
 
-## Learn More
+```bash
+bun install
+# or npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Run the development server:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+bun dev
+# or npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+6. Open [http://localhost:3000](http://localhost:3000)
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command        | Description              |
+| -------------- | ------------------------ |
+| `bun dev`      | Start dev server         |
+| `bun build`    | Production build         |
+| `bun start`    | Start production server  |
+| `bun lint`     | Run ESLint               |
