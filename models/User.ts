@@ -2,44 +2,38 @@ import mongoose, {
   HydratedDocument,
   InferSchemaType,
   model,
-  PaginateModel,
   Schema,
 } from "mongoose";
-import mongoosePaginate from "mongoose-paginate-v2";
-import uniqueValidator from "mongoose-unique-validator";
 
 const UserSchema = new Schema(
   {
-    name: String,
+    name: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
       unique: true,
-      index: true,
-      trim: true,
     },
-    address: {
-      type: String,
-      default: "Abovyan",
-    },
+    image: String,
+    emailVerified: Boolean,
   },
   {
     timestamps: true,
+    collection: "user",
   },
 );
-
-UserSchema.plugin(mongoosePaginate);
-UserSchema.plugin(uniqueValidator);
 
 export type IUser = InferSchemaType<typeof UserSchema>;
 export type UserDocument = HydratedDocument<IUser>;
 
-export type UserDto = Omit<IUser, "_id"> & {
+export type UserDto = Omit<IUser, "_id" | "createdAt" | "updatedAt"> & {
   _id: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
-const User =
-  (mongoose.models.User as PaginateModel<IUser>) ||
-  model<IUser, PaginateModel<IUser>>("User", UserSchema);
+const User = mongoose.models.User || model<IUser>("User", UserSchema);
 
 export default User;

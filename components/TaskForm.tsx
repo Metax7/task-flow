@@ -8,36 +8,37 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
 import { useTransition } from "react";
-import { createUserAction, updateUserAction } from "@/actions/users";
-import { createUserSchema, CreateUser } from "@/lib/schemas";
+import { createTaskAction, updateTaskAction } from "@/actions/tasks";
+import { createTaskSchema, CreateTask } from "@/lib/schemas";
 import { toast } from "sonner";
+import { TaskDto } from "@/models/Task";
+import { Textarea } from "./ui/textarea";
 
-export default function UserForm({
+export default function TaskForm({
   action,
-  userId,
+  task,
   onSuccess,
 }: {
   action: "create" | "update";
-  userId?: string;
+  task?: TaskDto;
   onSuccess?: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
 
   const { control, handleSubmit, reset } = useForm({
-    resolver: zodResolver(createUserSchema),
+    resolver: zodResolver(createTaskSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      address: "",
+      title: action === "update" ? (task?.title as string) : "",
+      description: action === "update" ? (task?.description as string) : "",
     },
   });
 
-  const onSubmit = async (data: CreateUser) => {
+  const onSubmit = async (data: CreateTask) => {
     startTransition(async () => {
       const res =
         action === "create"
-          ? await createUserAction(data)
-          : await updateUserAction(userId as string, data);
+          ? await createTaskAction(data)
+          : await updateTaskAction(task?._id as string, data);
 
       if ("error" in res) {
         toast.error(res.message);
@@ -55,11 +56,11 @@ export default function UserForm({
       <FieldGroup>
         <Controller
           control={control}
-          name="name"
+          name="title"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={field.name}>{startCase(field.name)}</FieldLabel>
-              <Input {...field} aria-invalid={fieldState.invalid} placeholder="Enter name..." />
+              <Input {...field} aria-invalid={fieldState.invalid} placeholder="Enter title..." />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -67,28 +68,16 @@ export default function UserForm({
 
         <Controller
           control={control}
-          name="email"
+          name="description"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={field.name}>{startCase(field.name)}</FieldLabel>
-              <Input
+              <Textarea
                 {...field}
-                type="email"
+                rows={5}
                 aria-invalid={fieldState.invalid}
-                placeholder="Enter name..."
+                placeholder="Enter description..."
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="address"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>{startCase(field.name)}</FieldLabel>
-              <Input {...field} aria-invalid={fieldState.invalid} placeholder="Enter name..." />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}

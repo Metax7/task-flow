@@ -1,13 +1,34 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI!;
 
-export default dbConnect;
+if (!MONGODB_URI) {
+  throw new Error("MONGODB_URI is not defined");
+}
 
-async function dbConnect() {
-  if (!MONGODB_URI) {
-    throw new Error("Please define the MONGODB_URI environment variable");
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
+
+declare global {
+  var mongooseCache: MongooseCache | undefined;
+}
+
+const cache: MongooseCache = global.mongooseCache || {
+  conn: null,
+  promise: null,
+};
+
+global.mongooseCache = cache;
+
+export async function dbConnect() {
+  if (cache.conn) return cache.conn;
+
+  if (!cache.promise) {
+    cache.promise = mongoose.connect(MONGODB_URI).then((mongoose) => mongoose);
   }
-  await mongoose.connect(MONGODB_URI);
-  return mongoose;
+
+  cache.conn = await cache.promise;
+  return cache.conn;
 }

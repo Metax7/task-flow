@@ -1,12 +1,12 @@
 "use server";
 
-import { CreateUser, createUserSchema } from "@/lib/schemas";
-import { createUserService, updateUserService } from "@/lib/server/user";
+import { CreateTask, createTaskSchema } from "@/lib/schemas";
+import { createTaskService, updateTaskService } from "@/lib/server/task";
 import { updateTag } from "next/cache";
-import { deleteUserService } from "@/lib/server/user";
+import { deleteTaskService } from "@/lib/server/task";
 
-export async function createUserAction(user: CreateUser) {
-  const validatedFields = createUserSchema.safeParse(user);
+export async function createTaskAction(task: CreateTask) {
+  const validatedFields = createTaskSchema.safeParse(task);
 
   const { success, data } = validatedFields;
 
@@ -17,20 +17,27 @@ export async function createUserAction(user: CreateUser) {
     };
   }
 
-  const res = await createUserService(data);
+  const res = await createTaskService(data);
 
   return res.match(
-    (user) => {
-      updateTag("users");
+    (task) => {
+      updateTag("tasks");
       return {
         success: true,
-        message: `User '${user.name}' has been successfully created`,
+        message: `Task '${task.title}' has been successfully created`,
       };
     },
     (error) => {
       const reason = error.reason;
 
       switch (reason) {
+        case "UNAUTHORIZED": {
+          return {
+            error: "Unauthorized",
+            message: error.message,
+          };
+        }
+
         case "UNEXPECTED": {
           return {
             error: "Unexpected",
@@ -53,8 +60,8 @@ export async function createUserAction(user: CreateUser) {
   );
 }
 
-export async function updateUserAction(userId: string, user: CreateUser) {
-  const validatedFields = createUserSchema.safeParse(user);
+export async function updateTaskAction(taskId: string, task: CreateTask) {
+  const validatedFields = createTaskSchema.safeParse(task);
 
   const { success, data } = validatedFields;
 
@@ -65,20 +72,27 @@ export async function updateUserAction(userId: string, user: CreateUser) {
     };
   }
 
-  const res = await updateUserService(data, userId);
+  const res = await updateTaskService(data, taskId);
 
   return res.match(
     (user) => {
-      updateTag("users");
+      updateTag("tasks");
       return {
         success: true,
-        message: `User '${user?.name}' has been successfully updated`,
+        message: `Task '${user?.title}' has been successfully updated`,
       };
     },
     (error) => {
       const reason = error.reason;
 
       switch (reason) {
+        case "UNAUTHORIZED": {
+          return {
+            error: "Unauthorized",
+            message: error.message,
+          };
+        }
+
         case "UNEXPECTED": {
           return {
             error: "Unexpected",
@@ -101,21 +115,28 @@ export async function updateUserAction(userId: string, user: CreateUser) {
   );
 }
 
-export async function deleteUserAction(userId: string) {
-  const res = await deleteUserService(userId);
+export async function deleteTaskAction(taskId: string) {
+  const res = await deleteTaskService(taskId);
 
   return res.match(
-    (user) => {
-      updateTag("users");
+    (task) => {
+      updateTag("tasks");
       return {
         success: true,
-        message: `User '${user?.name}' has been successfully deleted`,
+        message: `Task '${task?.title}' has been successfully deleted`,
       };
     },
     (error) => {
       const reason = error.reason;
 
       switch (reason) {
+        case "UNAUTHORIZED": {
+          return {
+            error: "Unauthorized",
+            message: error.message,
+          };
+        }
+
         case "UNEXPECTED": {
           return {
             error: "Unexpected",
