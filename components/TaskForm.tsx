@@ -17,11 +17,11 @@ import { Textarea } from "./ui/textarea";
 export default function TaskForm({
   action,
   task,
-  onSuccess,
+  onSuccessAction,
 }: {
   action: "create" | "update";
   task?: TaskDto;
-  onSuccess?: () => void;
+  onSuccessAction?: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -47,7 +47,7 @@ export default function TaskForm({
 
       toast.success(res.message);
       reset();
-      if (onSuccess) onSuccess();
+      if (onSuccessAction) onSuccessAction();
     });
   };
 

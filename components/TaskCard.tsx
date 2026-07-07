@@ -63,7 +63,7 @@ export default function TaskCard({ task }: { task: TaskDto }) {
                   <DialogHeader>
                     <DialogTitle>Update Task</DialogTitle>
                   </DialogHeader>
-                  <TaskForm action="update" task={task} onSuccess={() => setOpen(false)} />
+                  <TaskForm action="update" task={task} onSuccessAction={() => setOpen(false)} />
                 </DialogContent>
               </Dialog>
               <Button size="icon" variant="destructive" onClick={handleDeleteTask}>
