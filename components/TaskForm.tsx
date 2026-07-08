@@ -3,7 +3,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { startCase } from "es-toolkit";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
@@ -13,6 +12,7 @@ import { createTaskSchema, CreateTask } from "@/lib/schemas";
 import { toast } from "sonner";
 import { TaskDto } from "@/models/Task";
 import { Textarea } from "./ui/textarea";
+import { T, useGT, Branch } from "gt-next";
 
 export default function TaskForm({
   action,
@@ -24,6 +24,7 @@ export default function TaskForm({
   onSuccessAction?: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const gt = useGT();
 
   const { control, handleSubmit, reset } = useForm({
     resolver: zodResolver(createTaskSchema),
@@ -59,8 +60,8 @@ export default function TaskForm({
           name="title"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>{startCase(field.name)}</FieldLabel>
-              <Input {...field} aria-invalid={fieldState.invalid} placeholder="Enter title..." />
+              <FieldLabel htmlFor={field.name}>{gt("Title")}</FieldLabel>
+              <Input {...field} aria-invalid={fieldState.invalid} placeholder={gt("Enter title...")} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -71,12 +72,12 @@ export default function TaskForm({
           name="description"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>{startCase(field.name)}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{gt("Description")}</FieldLabel>
               <Textarea
                 {...field}
                 rows={5}
                 aria-invalid={fieldState.invalid}
-                placeholder="Enter description..."
+                placeholder={gt("Enter description...")}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -85,13 +86,12 @@ export default function TaskForm({
 
         <Field>
           <Button type="submit">
-            {isPending ? (
-              <>
-                <Spinner /> Submitting...
-              </>
-            ) : (
-              "Submit"
-            )}
+            <T>
+              <Branch branch={isPending}
+                false={"Submit"}
+                true={<><Spinner /> Submitting...</>}
+              />
+            </T>
           </Button>
         </Field>
       </FieldGroup>

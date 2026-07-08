@@ -9,8 +9,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CheckSquare } from "lucide-react";
+import { T, LocaleSelector } from "gt-next";
+import { tx } from "gt-next/server";
 
-async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
+async function Dashboard({
+  searchParams,
+}: {
+  searchParams: PageProps<"/[locale]">["searchParams"];
+}) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -19,6 +25,14 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
   const showMyTasks = resolvedSearchParams.filter === "my" && !!session?.user;
 
   const { docs: tasks } = showMyTasks ? await getUserTasks(session.user.id) : await getTasks();
+
+  const translatedTasks = await Promise.all(
+    tasks.map(async (task) => ({
+      ...task,
+      title: await tx(task.title),
+      description: task.description ? await tx(task.description) : task.description,
+    }))
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -35,6 +49,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
           </div>
 
           <div className="flex items-center gap-4">
+            <LocaleSelector />
             {session?.user ? (
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 pr-4 border-r">
@@ -60,10 +75,14 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="ghost" asChild size="sm">
-                  <Link href="/sign-in">Sign In</Link>
+                  <Link href="/sign-in">
+                    <T>Sign In</T>
+                  </Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link href="/sign-up">Sign Up</Link>
+                  <Link href="/sign-up">
+                    <T>Sign Up</T>
+                  </Link>
                 </Button>
               </div>
             )}
@@ -78,10 +97,12 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
           <div className="lg:col-span-2 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold font-heading">Tasks</h2>
-                <p className="text-muted-foreground text-sm">
-                  Manage your task list and view assignments
-                </p>
+                <T>
+                  <h2 className="text-2xl font-bold font-heading">Tasks</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Manage your task list and view assignments
+                  </p>
+                </T>
               </div>
 
               {session?.user && (
@@ -92,7 +113,9 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
                     asChild
                     className="h-8 rounded-md px-3"
                   >
-                    <Link href="/">All Tasks</Link>
+                    <Link href="/">
+                      <T>All Tasks</T>
+                    </Link>
                   </Button>
                   <Button
                     variant={showMyTasks ? "default" : "outline"}
@@ -100,7 +123,9 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
                     asChild
                     className="h-8 rounded-md px-3"
                   >
-                    <Link href="/?filter=my">My Tasks</Link>
+                    <Link href="/?filter=my">
+                      <T>My Tasks</T>
+                    </Link>
                   </Button>
                 </div>
               )}
@@ -111,14 +136,16 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
                 <div className="bg-muted p-4 rounded-full text-muted-foreground mb-4">
                   <CheckSquare className="size-8" />
                 </div>
-                <h3 className="font-semibold text-lg">No tasks yet</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                  Create a new task to get started. Tasks are associated with their creator.
-                </p>
+                <T>
+                  <h3 className="font-semibold text-lg">No tasks yet</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mt-1">
+                    Create a new task to get started. Tasks are associated with their creator.
+                  </p>
+                </T>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {tasks.map((task) => (
+                {translatedTasks.map((task) => (
                   <TaskCard key={task._id} task={task} />
                 ))}
               </div>
@@ -128,10 +155,12 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
           {/* Creation Section */}
           <div className="space-y-6 lg:sticky lg:top-24">
             <div>
-              <h2 className="text-2xl font-bold font-heading">Create Task</h2>
-              <p className="text-muted-foreground text-sm">
-                Add a new task to the collaborative board
-              </p>
+              <T>
+                <h2 className="text-2xl font-bold font-heading">Create Task</h2>
+                <p className="text-muted-foreground text-sm">
+                  Add a new task to the collaborative board
+                </p>
+              </T>
             </div>
 
             {session?.user ? (
@@ -140,16 +169,22 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
               </div>
             ) : (
               <div className="p-6 rounded-2xl bg-card border border-primary/20  text-center space-y-4">
-                <h3 className="font-semibold">Join the team</h3>
-                <p className="text-sm text-muted-foreground">
-                  You need to be signed in to create, update, or delete tasks.
-                </p>
+                <T>
+                  <h3 className="font-semibold">Join the team</h3>
+                  <p className="text-sm text-muted-foreground">
+                    You need to be signed in to create, update, or delete tasks.
+                  </p>
+                </T>
                 <div className="flex flex-col gap-2 pt-2">
                   <Button asChild className="w-full">
-                    <Link href="/sign-in">Sign In</Link>
+                    <Link href="/sign-in">
+                      <T>Sign In</T>
+                    </Link>
                   </Button>
                   <Button variant="outline" asChild className="w-full">
-                    <Link href="/sign-up">Sign Up</Link>
+                    <Link href="/sign-up">
+                      <T>Sign Up</T>
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -161,13 +196,15 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/">["searc
   );
 }
 
-export default function Home({ searchParams }: PageProps<"/">) {
+export default function Home({ searchParams }: PageProps<"/[locale]">) {
   return (
     <Suspense
       fallback={
         <div className="flex h-screen items-center justify-center bg-background text-foreground">
           <div className="flex flex-col items-center gap-2">
-            <span className="text-sm font-medium animate-pulse">Loading dashboard...</span>
+            <span className="text-sm font-medium animate-pulse">
+              <T>Loading dashboard...</T>
+            </span>
           </div>
         </div>
       }

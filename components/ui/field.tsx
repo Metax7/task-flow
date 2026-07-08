@@ -2,6 +2,7 @@
 
 import { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { useMessages, decodeMsg } from "gt-next"
 
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -181,6 +182,7 @@ function FieldError({
 }: React.ComponentProps<"div"> & {
   errors?: Array<{ message?: string } | undefined>
 }) {
+  const m = useMessages()
   const content = useMemo(() => {
     if (children) {
       return children
@@ -194,19 +196,22 @@ function FieldError({
       ...new Map(errors.map((error) => [error?.message, error])).values(),
     ]
 
+    const translate = (s: string) => m(s) || decodeMsg(s)
+
     if (uniqueErrors?.length == 1) {
-      return uniqueErrors[0]?.message
+      const msg = uniqueErrors[0]?.message
+      return msg ? translate(msg) : undefined
     }
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
         {uniqueErrors.map(
           (error, index) =>
-            error?.message && <li key={index}>{error.message}</li>
+            error?.message && <li key={index}>{translate(error.message)}</li>
         )}
       </ul>
     )
-  }, [children, errors])
+  }, [children, errors, m])
 
   if (!content) {
     return null

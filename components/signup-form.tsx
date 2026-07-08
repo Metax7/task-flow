@@ -14,9 +14,11 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import CryptoJS from "crypto-js";
+import { T, useGT, Branch } from "gt-next";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const gt = useGT();
 
   const {
     control,
@@ -51,7 +53,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     });
 
     if (error) {
-      toast.error(error.message || "Something went wrong");
+      toast.error(error.message || gt("Something went wrong"));
       return;
     }
 
@@ -67,13 +69,15 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
               <div className="flex size-8 items-center justify-center rounded-md">
                 <GalleryVerticalEnd className="size-6" />
               </div>
-              <span className="sr-only">Acme Inc.</span>
+              <span className="sr-only"><T>Acme Inc.</T></span>
             </Link>
-            <h1 className="text-xl font-bold">Welcome to Acme Inc.</h1>
+            <T>
+              <h1 className="text-xl font-bold">Welcome to Acme Inc.</h1>
+            </T>
             <FieldDescription>
-              Already have an account?{" "}
+              <T>Already have an account?</T>{" "}
               <Link href="/sign-in" className="text-primary hover:underline font-medium">
-                Sign in
+                <T>Sign in</T>
               </Link>
             </FieldDescription>
           </div>
@@ -83,12 +87,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
             name="name"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <FieldLabel htmlFor={field.name}><T>Name</T></FieldLabel>
                 <Input
                   id={field.name}
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  placeholder="John Doe"
+                  placeholder={gt("John Doe")}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -100,13 +104,13 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
             name="email"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <FieldLabel htmlFor={field.name}><T>Email</T></FieldLabel>
                 <Input
                   id={field.name}
                   type="email"
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  placeholder="m@example.com"
+                  placeholder={gt("m@example.com")}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -118,13 +122,13 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
             name="password"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <FieldLabel htmlFor={field.name}><T>Password</T></FieldLabel>
                 <Input
                   id={field.name}
                   type="password"
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  placeholder="Enter password..."
+                  placeholder={gt("Enter password...")}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -133,14 +137,19 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 
           <Field>
             <Button disabled={isSubmitting} type="submit">
-              Create Account
+              <T>
+                <Branch branch={isSubmitting}
+                  false={"Create Account"}
+                  true={"Creating account..."}
+                />
+              </T>
             </Button>
           </Field>
         </FieldGroup>
       </form>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a> and{" "}
-        <a href="#">Privacy Policy</a>.
+        <T>By clicking continue, you agree to our</T> <a href="#"><T>Terms of Service</T></a><T> and</T>{" "}
+        <a href="#"><T>Privacy Policy</T></a>.
       </FieldDescription>
     </div>
   );

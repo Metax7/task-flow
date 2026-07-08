@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button, ButtonProps } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { T } from "gt-next";
 
 export default function SignoutButton({
   className,
@@ -28,7 +29,7 @@ export default function SignoutButton({
       }}
     >
       <LogOut className="size-4 mr-2" />
-      Sign Out
+      <T>Sign Out</T>
     </Button>
   );
 }

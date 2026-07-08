@@ -12,16 +12,18 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { T, useGT, Branch, msg } from "gt-next";
 
 const signinSchema = z.object({
-  email: z.email("Invalid email"),
-  password: z.string().min(1, "Password is required"),
+  email: z.email(msg("Invalid email")),
+  password: z.string().min(1, msg("Password is required")),
 });
 
 type Signin = z.infer<typeof signinSchema>;
 
 export function SigninForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const gt = useGT();
 
   const {
     control,
@@ -44,11 +46,11 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
     });
 
     if (error) {
-      toast.error(error.message || "Failed to sign in");
+      toast.error(error.message || gt("Failed to sign in"));
       return;
     }
 
-    toast.success("Signed in successfully!");
+    toast.success(gt("Signed in successfully!"));
     router.push("/");
     reset();
   };
@@ -62,13 +64,15 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
               <div className="flex size-8 items-center justify-center rounded-md">
                 <GalleryVerticalEnd className="size-6" />
               </div>
-              <span className="sr-only">Acme Inc.</span>
+              <span className="sr-only"><T>Acme Inc.</T></span>
             </Link>
-            <h1 className="text-xl font-bold font-heading">Sign In</h1>
+            <T>
+              <h1 className="text-xl font-bold font-heading">Sign In</h1>
+            </T>
             <FieldDescription>
-              Don&apos;t have an account yet?{" "}
+              <T>Don&apos;t have an account yet?</T>{" "}
               <Link href="/sign-up" className="text-primary hover:underline font-medium">
-                Sign up
+                <T>Sign up</T>
               </Link>
             </FieldDescription>
           </div>
@@ -78,13 +82,13 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
             name="email"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <FieldLabel htmlFor={field.name}><T>Email</T></FieldLabel>
                 <Input
                   id={field.name}
                   type="email"
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  placeholder="m@example.com"
+                  placeholder={gt("m@example.com")}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -96,13 +100,13 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
             name="password"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <FieldLabel htmlFor={field.name}><T>Password</T></FieldLabel>
                 <Input
                   id={field.name}
                   type="password"
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  placeholder="Enter password..."
+                  placeholder={gt("Enter password...")}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -111,7 +115,12 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
 
           <Field>
             <Button disabled={isSubmitting} type="submit" className="w-full">
-              {isSubmitting ? "Signing in..." : "Sign In"}
+              <T>
+                <Branch branch={isSubmitting}
+                  false={"Sign In"}
+                  true={"Signing in..."}
+                />
+              </T>
             </Button>
           </Field>
         </FieldGroup>

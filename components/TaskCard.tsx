@@ -25,10 +25,12 @@ import { toast } from "sonner";
 import TaskForm from "./TaskForm";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { T, useGT } from "gt-next";
 
 export default function TaskCard({ task }: { task: TaskDto }) {
   const [open, setOpen] = useState(false);
   const { data: session } = authClient.useSession();
+  const gt = useGT();
 
   const isAuthor = session?.user && task.author?._id === session.user.id;
 
@@ -43,7 +45,7 @@ export default function TaskCard({ task }: { task: TaskDto }) {
     toast.success(res.message);
   };
 
-  const authorName = task.author?.name || "Unknown Author";
+  const authorName = task.author?.name || gt("Unknown Author");
   const authorImage = task.author?.image;
 
   return (
@@ -61,7 +63,7 @@ export default function TaskCard({ task }: { task: TaskDto }) {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Update Task</DialogTitle>
+                    <DialogTitle><T>Update Task</T></DialogTitle>
                   </DialogHeader>
                   <TaskForm action="update" task={task} onSuccessAction={() => setOpen(false)} />
                 </DialogContent>
@@ -79,7 +81,7 @@ export default function TaskCard({ task }: { task: TaskDto }) {
 
       <CardFooter className="justify-between border-t text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-muted-foreground/60">Created by:</span>
+          <span className="font-semibold text-muted-foreground/60"><T>Created by:</T></span>
           <div className="flex items-center gap-1.5">
             <Avatar>
               {authorImage && <AvatarImage src={authorImage} alt={authorName} />}
